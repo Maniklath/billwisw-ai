@@ -1,6 +1,9 @@
 
 import re
 import streamlit as st
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
 import pymupdf
 import pytesseract
 from PIL import Image
@@ -17,6 +20,48 @@ st.set_page_config(
     layout="wide"
 )
 
+# Sample data for expense classification
+training_descriptions = [
+    "AWS cloud hosting bill",
+    "Azure cloud services subscription",
+    "Google Cloud monthly usage",
+    "Laptop purchase",
+    "Keyboard and mouse purchase",
+    "Computer monitor purchase",
+    "Server hardware purchase",
+    "IT support service",
+    "Software maintenance service",
+    "Technical support charges",
+    "Office stationery purchase",
+    "Printer paper and pens",
+]
+
+training_categories = [
+    "Cloud Services",
+    "Cloud Services",
+    "Cloud Services",
+    "Hardware",
+    "Hardware",
+    "Hardware",
+    "Hardware",
+    "IT Support",
+    "IT Support",
+    "IT Support",
+    "Office Supplies",
+    "Office Supplies",
+]
+# Train the expense classification model
+vectorizer = TfidfVectorizer()
+X_train = vectorizer.fit_transform(training_descriptions)
+
+classifier = MultinomialNB()
+classifier.fit(X_train, training_categories)
+
+
+def predict_expense_category(description):
+    description_vector = vectorizer.transform([description])
+    prediction = classifier.predict(description_vector)
+    return prediction[0]
 st.title("🧾 BillWise AI")
 st.subheader("Intelligent Invoice & Expense Analyzer")
 st.write("Upload an invoice to extract its details automatically.")
@@ -135,6 +180,10 @@ if uploaded_file is not None:
         )
 
         st.success("Invoice text processed successfully!")
+
+        category = predict_expense_category(text)
+        st.subheader("Expense Classification")
+        st.metric("Predicted Category", category)
 
         col1, col2 = st.columns(2)
 
