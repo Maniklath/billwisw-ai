@@ -1,4 +1,3 @@
-
 import re
 import streamlit as st
 
@@ -10,13 +9,7 @@ st.set_page_config(
 
 st.title("🧾 BillWise AI")
 st.subheader("Intelligent Invoice & Expense Analyzer")
-
-st.write("Upload an invoice to extract important details automatically.")
-
-uploaded_file = st.file_uploader(
-    "Upload an invoice or receipt",
-    type=["txt", "pdf", "png", "jpg", "jpeg"]
-)
+st.write("Upload an invoice to extract its details automatically.")
 
 
 def extract_field(text, pattern):
@@ -24,9 +17,12 @@ def extract_field(text, pattern):
     return match.group(1).strip() if match else "Not found"
 
 
-if uploaded_file is not None:
-    st.success(f"File uploaded: {uploaded_file.name}")
+uploaded_file = st.file_uploader(
+    "Upload an invoice or receipt",
+    type=["txt", "pdf", "png", "jpg", "jpeg"]
+)
 
+if uploaded_file is not None:
     if uploaded_file.name.lower().endswith(".txt"):
         text = uploaded_file.getvalue().decode(
             "utf-8", errors="replace"
@@ -38,10 +34,11 @@ if uploaded_file is not None:
         date = extract_field(text, r"Date:\s*(.+)")
         vendor = extract_field(text, r"Vendor:\s*(.+)")
         total = extract_field(
-            text, r"Total Amount:\s*([0-9,]+(?:\.[0-9]{1,2})?)"
+            text,
+            r"Total Amount:\s*([0-9,]+(?:\.[0-9]{1,2})?)"
         )
 
-        st.subheader("📋 Extracted Invoice Details")
+        st.success("Invoice text processed successfully!")
 
         col1, col2 = st.columns(2)
 
@@ -57,4 +54,6 @@ if uploaded_file is not None:
             st.text(text)
 
     else:
-        st.info("PDF and image extraction will be added in a later step.")
+        st.info(
+            "PDF and image text extraction will be implemented next."
+        )
